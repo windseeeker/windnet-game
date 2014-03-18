@@ -1,0 +1,37 @@
+package warrior;
+
+message Role {
+		required int32 role_id = 1;
+		required int32 profession = 2;
+		required string role_name = 3;
+		required int32 gold = 4;
+		required int32 money = 5;
+		required int32 rmb = 6;
+		required int32 level = 7;
+		required int32 vip_level = 8;
+		required int32 exp = 9;
+		optional int32 last_logout_time = 10;
+		optional int32 souls_value = 11;
+		optional int32 souls_index = 12;
+}
+
+message Item {
+		required int32 global_id = 1;
+		required int32 role_id = 2;
+		required int32 item_id = 3;
+		required int32 item_num = 4;
+		required int32 index = 5;
+		required int32 level = 6;
+		required int32 state = 7;
+		optional int32 quality = 8;
+		optional int32 is_equip = 9;
+		optional string gems = 10;
+}
+
+message SoulItem {
+		required int32 id = 1;
+		required int32 soul_id = 2;
+		required int32 index = 3;
+		required int32 type = 4;
+		required int32 exp = 5;
+}
