@@ -9,17 +9,17 @@ class PlayerSession;
 class FriendServlet : public Servlet {
 public:
 	void setupServlet() {}
-	bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRequest(const std::string &type, ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
 protected:
-	bool doAddFriend(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doAddFriend(ServerResource *res, const std::string &token,
 					 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doAddBlackList(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doAddBlackList(ServerResource *res, const std::string &token,
 						PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doRemoveFriend(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRemoveFriend(ServerResource *res, const std::string &token,
                         PlayerSession *ps, Windnet::BSON::Object *request);
 
 };

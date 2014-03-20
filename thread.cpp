@@ -13,7 +13,7 @@ namespace Windnet {
 void * WorkThread::threadRoutine(void *arg) {
 	//fprintf(stdout, "Start working routine\n");
 	GameServer *gameServer = (GameServer*)arg;
-	ServerResource::ptr res = gameServer->serverRes();
+	ServerResource *res = gameServer->serverRes();
 
 	for (; ;) {
 		Message *msg = res->getQueue()->pop();

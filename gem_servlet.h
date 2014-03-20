@@ -9,20 +9,20 @@ class PlayerSession;
 class GemServlet : public Servlet {
 public:
 	void setupServlet() {}
-	bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRequest(const std::string &type, ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
 protected:
-	bool doGetEquipGem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doGetEquipGem(ServerResource *res, const std::string &token,
 					   PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doEquipGem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doEquipGem(ServerResource *res, const std::string &token,
 					PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doUnEquipGem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doUnEquipGem(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doStrengthGem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doStrengthGem(ServerResource *res, const std::string &token,
 					   PlayerSession *ps, Windnet::BSON::Object *request);
 };
 #endif

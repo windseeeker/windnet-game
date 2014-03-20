@@ -9,47 +9,47 @@ class PlayerSession;
 class ItemServlet : public Servlet {
 public:
 	void setupServlet() {}
-	bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRequest(const std::string &type, ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
 protected:
-	bool doLoadItems(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doLoadItems(ServerResource *res, const std::string &token,
 					 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doAddItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doAddItem(ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doBuyItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doBuyItem(ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doSellItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doSellItem(ServerResource *res, const std::string &token,
 					PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doSortItems(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doSortItems(ServerResource *res, const std::string &token,
 					 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doMoveItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doMoveItem(ServerResource *res, const std::string &token,
 					PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doStrengthItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doStrengthItem(ServerResource *res, const std::string &token,
 						PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doGetEquipments(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doGetEquipments(ServerResource *res, const std::string &token,
 						 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doGetStrengthEquipInfo(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doGetStrengthEquipInfo(ServerResource *res, const std::string &token,
 								PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doGetEquipGems(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doGetEquipGems(ServerResource *res, const std::string &token,
 						PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doEquipItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doEquipItem(ServerResource *res, const std::string &token,
 					 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doUnEquipItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doUnEquipItem(ServerResource *res, const std::string &token,
 					   PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doAbandonItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doAbandonItem(ServerResource *res, const std::string &token,
 					   PlayerSession *ps, Windnet::BSON::Object *request);
 };
 #endif

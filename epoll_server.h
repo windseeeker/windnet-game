@@ -9,7 +9,7 @@ namespace Windnet {
 namespace Net {
 class EpollServer {
 public:
-    EpollServer(boost::shared_ptr<ServerResource> &res):m_serverRes(res) { }
+    EpollServer(ServerResource *res):m_serverRes(res) { }
 
 	int init();
 	int add(int fd, void *ptr);
@@ -19,7 +19,7 @@ public:
 
 private:
 	int m_epfd;
-	boost::shared_ptr<ServerResource> &m_serverRes;
+	ServerResource *m_serverRes;
 };
 }
 }

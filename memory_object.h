@@ -4,6 +4,9 @@
 class MemoryObject {
 public:
 
+private:
+	int m_flag;
+	int m_ref;
 };
 
 #endif

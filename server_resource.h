@@ -36,6 +36,7 @@ public:
 	boost::shared_ptr<ServletDispatch> getServletsDispatch() { return m_servletsDispatch; }
 
 	boost::shared_ptr<ServerManager> getServerManager() { return m_serverManager; }
+	PlayerSessionManager *getPlayerSessionManager() { return m_psm; }
 
 	boost::shared_ptr<GameTemplateManager> getTemplateManager() { return m_templateManager; }
 
@@ -44,7 +45,8 @@ private:
 	boost::shared_ptr<AccountManager> m_accountMgr;
 	boost::shared_ptr<RoleManager> m_roleManager;
 	boost::shared_ptr<SceneManager> m_sceneManager;
-	boost::shared_ptr<PlayerSessionManager> m_psm;
+
+	PlayerSessionManager *m_psm;
 	boost::shared_ptr<ServerManager> m_serverManager;
 
 	boost::shared_ptr<ServletDispatch> m_servletsDispatch;

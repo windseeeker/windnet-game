@@ -8,13 +8,14 @@
 class PlayerSession;
 class PlayerSessionManager {
 public:
-	typedef boost::shared_ptr<PlayerSessionManager> ptr;
-
 	PlayerSession *getOnlinePlayer(int roleId);
+	PlayerSession *getPlayer(int roleId);
+
+	void playerOffline(PlayerSession *ps);
 
 private:
 	std::map<int, PlayerSession*> m_onlinePlayers;
-	std::map<int, PlayerSession*> m_cachePlayers;
+	std::map<int, PlayerSession*> m_cachePlayers; //cache player works as LRU
 };
 
 #endif

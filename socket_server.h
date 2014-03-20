@@ -17,8 +17,8 @@ public:
 		char serviceType;
 		int port;
 	};
-    SocketServer(boost::shared_ptr<ServerResource> res):m_resource(res) { }
-	boost::shared_ptr<ServerResource>& serverResource() { return m_resource; }
+    SocketServer(ServerResource *res):m_resource(res) { }
+	ServerResource *serverResource() { return m_resource; }
 
 	int startServer();
 	int initServer();
@@ -28,7 +28,7 @@ public:
 
 private:
 	EpollServer *m_epServer;
-	boost::shared_ptr<ServerResource> m_resource;
+	ServerResource *m_resource;
 };
 }
 }

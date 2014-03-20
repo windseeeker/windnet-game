@@ -91,7 +91,7 @@ void ServletDispatch::init() {
 	m_servlets.insert(std::make_pair("EquipSoulMetaInfo", servlet));
 }
 
-bool ServletDispatch::dispatchMessage(ServerResource::ptr res, Message *msg) {
+bool ServletDispatch::dispatchMessage(ServerResource *res, Message *msg) {
 	fprintf(stdout, "Dispatch message\n");
 	std::string proto = BSON::getStringVal("Command", &msg->request);
 	std::string token = BSON::getStringVal("Token", &msg->request);
@@ -118,7 +118,7 @@ bool ServletDispatch::dispatchMessage(ServerResource::ptr res, Message *msg) {
 	return ret;
 }
 
-bool ServletDispatch::dispatch(ServerResource::ptr res, PlayerSession *ps, BSON::Object &request) {
+bool ServletDispatch::dispatch(ServerResource *res, PlayerSession *ps, BSON::Object &request) {
 	std::string proto = BSON::getStringVal("Command", &request);
 	std::string token = BSON::getStringVal("Token", &request);
 	fprintf(stdout, "Command : %s, service \n", proto.c_str());//, (int)ps->serviceType());

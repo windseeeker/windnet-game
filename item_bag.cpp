@@ -7,6 +7,7 @@
 #include "mysql/dbconnection.h"
 
 #include "dataset/item_template_manager.h"
+#include "role.h"
 #include "util.h"
 
 using namespace Windnet;
@@ -162,11 +163,23 @@ Item::ptr ItemBag::get(int itemId) {
 	return it == m_itemMap.end() ? Item::ptr() : it->second;
 }
 
-void ItemBag::loadFromDB(Dataset::ItemTemplateManager *itm, DBConnection::ptr conn, int roleId) {
-	conn->execute("select * from items where role_id = %d", roleId);
+//TODO ...............Optimize
+int ItemBag::getItemCountByTemplateId(int templateId) {
+	int ret = 0;
+	for (std::map<int, Item::ptr>::iterator it = m_itemMap.begin();
+		 it != m_itemMap.end(); ++it) {
+		if (it->second->itemId() == templateId) {
+			++ret;
+		}
+	}
+	return ret;
+}
+
+void ItemBag::loadFromDB(Dataset::ItemTemplateManager *itm, DBConnection::ptr conn, Role *role) {
+	conn->execute("select * from items where role_id = %d", role->id());
 	size_t rows = conn->rows();
 
-	printf("Role %d has %d items\n", roleId, (int)rows);
+	printf("Role %d has %d items\n", role->id(), (int)rows);
 	for (size_t i = 0; i < rows; ++i) {
 		int templateId = conn->getInteger(i, "item_id");
 		Dataset::ItemTemplate *it = itm->get(templateId);
@@ -179,19 +192,16 @@ void ItemBag::loadFromDB(Dataset::ItemTemplateManager *itm, DBConnection::ptr co
 		}
 		Item::ptr item(new Item(it));
 		item->id(conn->getInteger(i, "id"));
-		item->roleId(roleId);
+		item->roleId(role->id());
 		item->itemId(conn->getInteger(i, "item_id"));
 		item->number(conn->getInteger(i, "number"));
 		item->index(conn->getInteger(i, "item_idx"));
-		if (item->index() >= (int)m_items.size()) {
-			m_items.resize(item->index() + 1);
-		}
 		std::string gemStr = conn->getString(i, "gems");
 		if (!gemStr.empty()) {
 			std::vector<std::string> vect = split(gemStr, ';');
 			for (size_t j = 0; j < vect.size(); ++j) {
 				std::vector<std::string> gemVect = split(vect[j], ',');
-				if (gemVect.size() != 5) {
+				if (gemVect.size() != 4) {
 					printf("Boad gem stringggggggggggggg in db\n");
 					continue;
 				}
@@ -199,13 +209,20 @@ void ItemBag::loadFromDB(Dataset::ItemTemplateManager *itm, DBConnection::ptr co
 				gem->id = boost::lexical_cast<int>(gemVect[0]);
 				gem->gemId = boost::lexical_cast<int>(gemVect[1]);
 				gem->pos = boost::lexical_cast<int>(gemVect[2]);
-				gem->current = boost::lexical_cast<int>(gemVect[3]);
-				gem->max = boost::lexical_cast<int>(gemVect[4]);
+				gem->exp = boost::lexical_cast<int>(gemVect[3]);
 
 				item->m_gems.push_back(gem);;
 			}
 		}
-		m_items[item->index()] = item;
+		item->isEquip(conn->getSmallint(i, "is_equip"));
+		if (item->isEquip()) {
+			role->addEquipItem(item);
+		} else {
+			if (item->index() >= (int)m_items.size()) {
+				m_items.resize(item->index() + 1);
+			}
+			m_items[item->index()] = item;
+		}
 		m_itemMap.insert(std::make_pair(item->id(), item));
 	}
 }

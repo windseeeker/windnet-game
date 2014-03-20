@@ -51,17 +51,17 @@ int main() {
 	std::vector<SocketServer::SockThreadParam*> params;
 	params.resize(3);
 	params[0] = new SocketServer::SockThreadParam;
-	params[0]->sockServer = gameServer.sockServer().get();
+	params[0]->sockServer = gameServer.sockServer();
 	params[0]->port = 20000;
 	params[0]->serviceType = Socket::SERVICE_GATE;
 
 	params[1] = new SocketServer::SockThreadParam;
-	params[1]->sockServer = gameServer.sockServer().get();
+	params[1]->sockServer = gameServer.sockServer();
 	params[1]->port = 20001;
 	params[1]->serviceType = Socket::SERVICE_SHORT;
 
 	params[2] = new SocketServer::SockThreadParam;
-	params[2]->sockServer =  gameServer.sockServer().get();
+	params[2]->sockServer =  gameServer.sockServer();
 	params[2]->port = 20003;
 	params[2]->serviceType = Socket::SERVICE_LONG;
 

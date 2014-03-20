@@ -16,8 +16,12 @@
 using namespace Windnet;
 using namespace Windnet::Net;
 
-bool SoulItemServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 								PlayerSession *ps, BSON::Object *request) {
+	if (!ps->role()) {
+		printf("Playersession has no role\n");
+		return false;
+	}
 	if (type == "SoulMetaInfo") {
 		return doLoadSoulItems(res, token, ps, request);
 	} else if (type == "LotterySoulMeta") {
@@ -33,17 +37,16 @@ bool SoulItemServlet::doRequest(const std::string &type, ServerResource::ptr res
 	} else if (type == "BuySoulMeta") {
 		return doBuySoulItem(res, token, ps, request);
 	} else if (type == "EquipSoulMeta") {
-		return doEquiSoulItem(res, token, ps, request);
+		return doEquipSoulItem(res, token, ps, request);
 	} else if (type == "EquipSoulMetaInfo") {
-		return doGetEquipItemSoul(res, token, ps, request);
+		return doGetEquippedSouls(res, token, ps, request);
 	}
-
 	fprintf(stdout, "Unknown protocol %s\n", type.c_str());
 	fflush(stdout);
 	return false;
 }
 
-bool SoulItemServlet::doLoadSoulItems(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doLoadSoulItems(ServerResource *res, const std::string &token,
 									  PlayerSession *ps,  BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::Array bagSouls, huntedSouls;
@@ -51,7 +54,7 @@ bool SoulItemServlet::doLoadSoulItems(ServerResource::ptr res, const std::string
 
 	Role *role = ps->role();
 	SoulsBag *sb = role->soulsBag();
-	const std::map<int, SoulItem*> huntedSoulsMap = sb->huntedSouls();
+	std::map<int, SoulItem*> huntedSoulsMap = sb->huntedSouls();
 	const std::map<int, SoulItem*> soulsBag = sb->soulsBag();
 
 	for (std::map<int, SoulItem*>::const_iterator it = huntedSoulsMap.begin();
@@ -95,7 +98,7 @@ bool SoulItemServlet::doLoadSoulItems(ServerResource::ptr res, const std::string
 	return true;
 }
 
-bool SoulItemServlet::doHuntSoulItem(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doHuntSoulItem(ServerResource *res, const std::string &token,
 									 PlayerSession *ps,  BSON::Object *request) {
 	int id = BSON::getIntVal("SoulMetaIndex", request);
 
@@ -142,7 +145,7 @@ bool SoulItemServlet::doHuntSoulItem(ServerResource::ptr res, const std::string 
 		role->addSoulsValue(huntInfo->soulValue);
 		role->flushToDB(res->getDBConnection());
 
-		item = new SoulItem;
+		item = new SoulItem(itemTemp);
 		item->soulId(itemTemp->itemId);
 		item->index(sb->nextHuntSoulIndex());
 		item->flushNewToDB(res->getDBConnection(), role->id());
@@ -170,7 +173,7 @@ bool SoulItemServlet::doHuntSoulItem(ServerResource::ptr res, const std::string 
 	return true;
 }
 
-bool SoulItemServlet::doStoreSoulItem(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doStoreSoulItem(ServerResource *res, const std::string &token,
 									  PlayerSession *ps,  BSON::Object *request) {
 	int id = BSON::getIntVal("Id", request);
 
@@ -200,13 +203,71 @@ bool SoulItemServlet::doStoreSoulItem(ServerResource::ptr res, const std::string
 	Buffer buf;
 	BSON::serializeToBuffer(buf, response);
 	BsonBuffer::serializeToBuffer(buf);
-    ps->sendData(buf);
+	ps->sendData(buf);
 	return true;
 }
 
-bool SoulItemServlet::doSwallowSoulItem(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doSwallowSoulItem(ServerResource *res, const std::string &token,
 										PlayerSession *ps, BSON::Object *request) {
-	BSON::Object response;
+	int swallowId = BSON::getIntVal("Id", request);
+	int swallowedId = BSON::getIntVal("BeId", request);
+
+	Role *role = ps->role();
+	SoulItem *swallowSoul = role->soulsBag()->getSoul(swallowId);
+	if (!swallowSoul) {
+		printf("No such swallow from item %d\n", swallowId);
+		return true;
+	}
+	SoulItem *toSoul = role->soulsBag()->getSoul(swallowedId);
+	if (!toSoul) {
+		printf("No such swallow to item %d\n", swallowedId);
+		return true;
+	}
+	Dataset::SoulItemTemplate *sit = res->getTemplateManager()->getSoulItemTemplate();
+	short toLevel = sit->getLevelByExp(toSoul->quality(), toSoul->exp());
+	if (toLevel < 0) {
+		printf("Can't get level from quality(%d), exp(%d)\n", toSoul->quality(), toSoul->exp());
+		return true;
+	}
+	Dataset::SoulInfo *info = sit->getSoulInfo(toSoul->quality(), toLevel);
+	if (!info) {
+		printf("Get soul info item error, quality %d, level %d\n", toSoul->quality(), toLevel);
+		return true;
+	}
+	short oldLevel = sit->getLevelByExp(swallowSoul->quality(), swallowSoul->exp());
+	swallowSoul->addExp(info->swallowExp + toSoul->exp());
+
+	short newLevel = sit->getLevelByExp(swallowSoul->quality(), swallowSoul->exp());
+	if (newLevel != oldLevel) {
+		short delta = newLevel - oldLevel;
+
+		Dataset::ItemTemplateManager *itm = res->getTemplateManager()->getItemTemplateManager();
+		Dataset::ItemTemplate *it = swallowSoul->getTemplate();
+		for (int i = 0; i < delta; ++i) {
+			it = itm->get(it->strengthNextLevelId);
+			if (!it) {
+				printf("No such item id(%d)\n", it->strengthNextLevelId);
+				return true;
+			}
+		}
+		swallowSoul->soulId(it->itemId);
+		swallowSoul->setTemplate(it);
+	}
+	swallowSoul->flushToDB(res->getDBConnection(), role->id());
+
+	toSoul->type(SoulItem::SOUL_ITEM_TYPE_DELETED);
+	toSoul->flushToDB(res->getDBConnection(), role->id());
+	role->soulsBag()->remove(toSoul);
+
+	BSON::Object response, body;
+	BSON::setStringVal(response, "Command", "SwallowOne");
+	BSON::setIntVal(body, "Id", swallowSoul->id());
+	BSON::setIntVal(body, "SoulMetaId", swallowSoul->soulId());
+	BSON::setIntVal(body, "Page", swallowSoul->index() / SoulsBag::SOULS_COUNT_PER_PAGE);
+	BSON::setIntVal(body, "Index", swallowSoul->index() % SoulsBag::SOULS_COUNT_PER_PAGE);
+	BSON::setIntVal(body, "Exp", swallowSoul->exp());
+	BSON::setObjectVal(response, "Body", body);
+
 	Buffer buf;
 	BSON::serializeToBuffer(buf, response);
 	BsonBuffer::serializeToBuffer(buf);
@@ -214,12 +275,85 @@ bool SoulItemServlet::doSwallowSoulItem(ServerResource::ptr res, const std::stri
 	return true;
 }
 
-bool SoulItemServlet::doSwallowAll(ServerResource::ptr res, const std::string &token,
+//TODO optimize
+bool SoulItemServlet::doSwallowAll(ServerResource *res, const std::string &token,
 								   PlayerSession *ps,  BSON::Object *request) {
+	Role *role = ps->role();
+	std::map<int, SoulItem*> souls = role->soulsBag()->huntedSouls();
+	if (souls.empty()) {
+		printf("Empty hunted souls, but swallAll\n");
+		return true;
+	}
+	std::map<int, SoulItem*>::const_iterator it = souls.begin(); 
+	SoulItem *swallowSoul = it->second;
+	if (!swallowSoul) {
+		return true;
+	}
+	for (++it; it != souls.end(); ++it) {
+		if (it->second->quality() > swallowSoul->quality()) {
+			swallowSoul = it->second;
+		}
+	}
+	souls.erase(swallowSoul->id());
+
+	Dataset::SoulItemTemplate *sit = res->getTemplateManager()->getSoulItemTemplate();
+	short oldLevel = sit->getLevelByExp(swallowSoul->quality(), swallowSoul->exp());
+
+	for (it = souls.begin(); it != souls.end(); ++it) {
+		SoulItem *soul = it->second;
+		short level = sit->getLevelByExp(soul->quality(), soul->exp());
+		if (level < 0) {
+			printf("Can't get level from quality(%d), exp(%d)\n", soul->quality(), soul->exp());
+			return true;
+		}
+		Dataset::SoulInfo *info = sit->getSoulInfo(soul->quality(), level);
+		if (!info) {
+			printf("Get soul info item error, quality %d, level %d\n", soul->quality(), level);
+			return true;
+		}
+		soul->type(SoulItem::SOUL_ITEM_TYPE_DELETED);
+		soul->flushToDB(res->getDBConnection(), role->id());
+		role->soulsBag()->removeHuntedSoul(soul);
+
+		swallowSoul->addExp(info->swallowExp + soul->exp());
+	}
+	short newLevel = sit->getLevelByExp(swallowSoul->quality(), swallowSoul->exp());
+	if (newLevel != oldLevel) {
+        short delta = newLevel - oldLevel;
+
+		Dataset::ItemTemplateManager *itm = res->getTemplateManager()->getItemTemplateManager();
+		Dataset::ItemTemplate *it = swallowSoul->getTemplate();
+		for (int i = 0; i < delta; ++i) {
+			it = itm->get(it->strengthNextLevelId);
+			if (!it) {
+				printf("No such item id(%d)\n", it->strengthNextLevelId);
+				return true;
+			}
+        }
+		swallowSoul->soulId(it->itemId);
+		swallowSoul->setTemplate(it);
+    }
+	role->soulsBag()->removeHuntedSoul(swallowSoul, false);
+	role->soulsBag()->storeSoulItem(swallowSoul);
+	swallowSoul->flushToDB(res->getDBConnection(), role->id());
+
+	BSON::Object response, body;
+	BSON::setStringVal(response, "Command", "SwallowQuickly");
+	BSON::setIntVal(body, "Id", swallowSoul->id());
+	BSON::setIntVal(body, "SoulMetaId", swallowSoul->soulId());
+	BSON::setIntVal(body, "Page", swallowSoul->index() / SoulsBag::SOULS_COUNT_PER_PAGE);
+	BSON::setIntVal(body, "Index", swallowSoul->index() % SoulsBag::SOULS_COUNT_PER_PAGE);
+	BSON::setIntVal(body, "Exp", swallowSoul->exp());
+	BSON::setObjectVal(response, "Body", body);
+
+    Buffer buf;
+	BSON::serializeToBuffer(buf, response);
+	BsonBuffer::serializeToBuffer(buf);
+    ps->sendData(buf);
 	return true;
 }
 
-bool SoulItemServlet::doBuySoulItem(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doBuySoulItem(ServerResource *res, const std::string &token,
 									PlayerSession *ps,  BSON::Object *request) {
 	int soulItemId = BSON::getIntVal("SoulMetaId", request);
 	int buyCount = BSON::getIntVal("Count", request);
@@ -242,37 +376,98 @@ bool SoulItemServlet::doBuySoulItem(ServerResource::ptr res, const std::string &
 	Buffer buf;
 	BSON::serializeToBuffer(buf, response);
 	BsonBuffer::serializeToBuffer(buf);
-    ps->sendData(buf);
+	ps->sendData(buf);
 
 	//BSON::setIntVal(
 	return true;
 }
 
-bool SoulItemServlet::doEquiSoulItem(ServerResource::ptr res, const std::string &token,
-									 PlayerSession *ps,  BSON::Object *request) {
-	//int soulId = BSON::getIntVal("EquipSoulMeta", request);
-	//int index = BSON::getIntVal("Index", request);
+bool SoulItemServlet::doEquipSoulItem(ServerResource *res, const std::string &token,
+									  PlayerSession *ps,  BSON::Object *request) {
+	int id = BSON::getIntVal("Id", request);
+	int index = BSON::getIntVal("Index", request);
 
+	Role *role = ps->role();
+	SoulItem *item = role->soulsBag()->getSoul(id);
+	if (!item) {
+		printf("No such soul item [%d] to equip\n", id);
+		return true;
+	}
+	if (item->type() == SoulItem::SOUL_ITEM_TYPE_EQUIPPED) {
+		printf("Soul item [%d] already equipped\n", id);
+		return true;
+	}
+	role->soulsBag()->remove(item);
+	item->index(index);
+	item->type(SoulItem::SOUL_ITEM_TYPE_EQUIPPED);
+	role->soulsBag()->addEquipSoul(item);
+	item->flushToDB(res->getDBConnection(), role->id());
 
+	BSON::Object response, body;
+	BSON::setStringVal(response, "Command", "EquipSoulMeta");
+	BSON::setBoolVal(body, "Success", true);
+	BSON::setObjectVal(response, "Body", body);
 
+	Buffer buf;
+	BSON::serializeToBuffer(buf, response);
+	BsonBuffer::serializeToBuffer(buf);
+    ps->sendData(buf);
 	return true;
 }
 
-bool SoulItemServlet::doMoveSoulItem(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doMoveSoulItem(ServerResource *res, const std::string &token,
 									 PlayerSession *ps,  BSON::Object *request) {
-	//int soulId = BSON::getIntVal("Id", request);
-	//int page = BSON::getIntVal("Page", request);
-	//int index = BSON::getIntVal("Index", request);
+	int id = BSON::getIntVal("Id", request);
+	Role *role = ps->role();
+	SoulItem *fromItem = role->soulsBag()->getSoul(id);
+	if (!fromItem) {
+		printf("No such item [%d] to move\n", id);
+		return true;
+	}
+	short page = BSON::getIntVal("Page", request);
+	short idx = BSON::getIntVal("Index", request);
+	short toIndex = page * SoulsBag::SOULS_COUNT_PER_PAGE + idx;
 
+	//ASSERT toIndx is a null space
+	fromItem->index(toIndex);
+	fromItem->flushToDB(res->getDBConnection(), role->id());
+	printf("Move soul item [%d], to page(%d) idx(%d)\n", id, page, idx);
+
+	BSON::Object response, body;
+	BSON::setStringVal(response, "Command", "SoulMetaMove");
+	BSON::setBoolVal(body, "Success", true);
+	BSON::setObjectVal(response, "Body", body);
+
+	Buffer buf;
+	BSON::serializeToBuffer(buf, response);
+	BsonBuffer::serializeToBuffer(buf);
+	ps->sendData(buf);
 	return true;
 }
 
-bool SoulItemServlet::doGetEquipItemSoul(ServerResource::ptr res, const std::string &token,
+bool SoulItemServlet::doGetEquippedSouls(ServerResource *res, const std::string &token,
 										 PlayerSession *ps,  BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::Array array;
 	BSON::setStringVal(response, "Command", "EquipSoulMetaInfo");
 
+	Role *role = ps->role();
+	SoulsBag *sb = role->soulsBag();
+	const std::map<int, SoulItem*> soulsMap = sb->equippedSouls();
+
+	for (std::map<int, SoulItem*>::const_iterator it = soulsMap.begin();
+         it != soulsMap.end(); ++it) {
+		BSON::Object obj;
+		BSON::setIntVal(obj, "Id", it->second->id());
+		BSON::setIntVal(obj, "SoulMetaId", it->second->soulId());
+		BSON::setIntVal(obj, "Index", it->second->index());
+		BSON::setIntVal(obj, "Exp", it->second->exp());
+
+		BSON::Value val;
+		val = obj;
+		val.valueType = BSON_OBJECT;
+		array.push_back(val);
+    }
 	BSON::setArrayVal(body, "SoulMetas", array);
 	BSON::setObjectVal(response, "Body", body);
 	Buffer buf;

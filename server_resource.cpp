@@ -6,6 +6,7 @@
 #include "role_manager.h"
 #include "mysql/dbconnection.h"
 #include "mysql/dbconnection_pool.h"
+#include "player_session_manager.h"
 #include "servlet.h"
 #include "ring_queue.h"
 
@@ -34,6 +35,8 @@ void ServerResource::init() {
 
 	m_sceneManager.reset(new SceneManager);
 	m_sceneManager->initScenes(m_templateManager->getSceneTemplateManager());
+
+	m_psm = new PlayerSessionManager;
 }
 
 DBConnection::ptr ServerResource::getDBConnection() {

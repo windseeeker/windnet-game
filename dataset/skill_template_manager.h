@@ -22,10 +22,10 @@ public:
 
 	bool init();
 
-	SkillTemplate::ptr get(int id);
+	SkillTemplate *get(int id);
 
 private:
-	std::map<int, SkillTemplate::ptr> m_skills;
+	std::map<int, SkillTemplate*> m_skills;
 };
 }
 

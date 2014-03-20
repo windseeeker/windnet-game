@@ -10,7 +10,7 @@
 using namespace Windnet;
 using namespace Windnet::Net;
 
-bool FriendServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool FriendServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 							  PlayerSession *ps, BSON::Object *request) {
 	if (type == "AddFriend") {
 		return doAddFriend(res, token, ps, request);
@@ -25,17 +25,17 @@ bool FriendServlet::doRequest(const std::string &type, ServerResource::ptr res, 
 	return false;
 }
 
-bool FriendServlet::doAddFriend(ServerResource::ptr res, const std::string &token,
+bool FriendServlet::doAddFriend(ServerResource *res, const std::string &token,
 								PlayerSession *ps,  BSON::Object *request) {
 	return true;
 }
 
-bool FriendServlet::doAddBlackList(ServerResource::ptr res, const std::string &token,
+bool FriendServlet::doAddBlackList(ServerResource *res, const std::string &token,
 								   PlayerSession *ps,  BSON::Object *request) {
 	return true;
 }
 
-bool FriendServlet::doRemoveFriend(ServerResource::ptr res, const std::string &token,
+bool FriendServlet::doRemoveFriend(ServerResource *res, const std::string &token,
 								   PlayerSession *ps,  BSON::Object *request) {
 	return true;
 }

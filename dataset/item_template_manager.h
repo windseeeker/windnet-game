@@ -41,6 +41,7 @@ struct ItemTemplate {
 	short stackNum;
 	short strengthNextLevelId;
 	short strengthLevel;
+	int correspondingExp;
 	RoleAttribute *attr;
 };
 

@@ -22,24 +22,25 @@ bool ItemTemplateManager::init() {
 		ASSERT(reader.Attribute("Item_Sex", item->stackNum));
 		reader.Attribute("StrengThen_Next", item->strengthNextLevelId); ///////
 		ASSERT(reader.Attribute("strengthenLevel", item->strengthLevel));
+		ASSERT(reader.Attribute("upexp", item->correspondingExp));
 
 		RoleAttribute *ra = new RoleAttribute;
-		//ASSERT(reader.Attribute("Maxhp", ra->maxHP));
-		//ASSERT(reader.Attribute("Maxmp", ra->maxMP));
-		//ASSERT(reader.Attribute("minAttack", ra->minPhysicalAttack));
-		//ASSERT(reader.Attribute("maxAttack", ra->maxPhysicalAttack));
-		//ASSERT(reader.Attribute("minMagic", ra->maxMagicAttack));
-		//ASSERT(reader.Attribute("maxMagic", ra->minMagicAttack));
-		//ASSERT(reader.Attribute("Defense", ra->defence));
-		//ASSERT(reader.Attribute("MagicDefense", ra->magicDefence));
+		ASSERT(reader.Attribute("Maxhp", ra->maxHP));
+		ASSERT(reader.Attribute("Maxmp", ra->maxMP));
+		ASSERT(reader.Attribute("minAttack", ra->minPhysicalAttack));
+		ASSERT(reader.Attribute("maxAttack", ra->maxPhysicalAttack));
+		ASSERT(reader.Attribute("minMagic", ra->maxMagicAttack));
+		ASSERT(reader.Attribute("maxMagic", ra->minMagicAttack));
+		ASSERT(reader.Attribute("Defense", ra->defence));
+		ASSERT(reader.Attribute("MagicDefense", ra->magicDefence));
+		ASSERT(reader.Attribute("Item_Hits", ra->hit));
+		ASSERT(reader.Attribute("Attack_Fatal", ra->crit));
 
-		//ASSERT(reader.Attribute("Item_Hits", ra->hit));
-		//ASSERT(reader.Attribute("Attack_Fatal", ra->crit));
 		item->attr = ra;
 		m_items.insert(std::make_pair(item->itemId, item));
 
 		//soulItem
-		if (item->itemType == ITEM_TYPE_SOUL) {
+		if (item->itemType == ITEM_TYPE_SOUL && item->strengthLevel == 1) {
 			std::map<short, std::vector<ItemTemplate*> >::iterator it = m_soulItems.find(item->quality);
 			if (it != m_soulItems.end()) {
 				(it->second).push_back(item);

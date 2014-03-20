@@ -16,7 +16,7 @@
 using namespace Windnet;
 using namespace Windnet::Net;
 
-bool ItemServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 							PlayerSession *ps, BSON::Object *request) {
 	Role *role = ps->role();
 	if (!role) {
@@ -54,7 +54,7 @@ bool ItemServlet::doRequest(const std::string &type, ServerResource::ptr res, co
 	return false;
 }
 
-bool ItemServlet::doLoadItems(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doLoadItems(ServerResource *res, const std::string &token,
 							  PlayerSession *ps,  BSON::Object *request) {
 	printf("load items\n");
 	BSON::Object response, body;
@@ -90,7 +90,7 @@ bool ItemServlet::doLoadItems(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool ItemServlet::doBuyItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doBuyItem(ServerResource *res, const std::string &token,
                             PlayerSession *ps, BSON::Object *request) {
 	int itemId = BSON::getIntVal("Id", request);
 	int count = BSON::getIntVal("Count", request);
@@ -147,7 +147,7 @@ bool ItemServlet::doBuyItem(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool ItemServlet::doSellItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doSellItem(ServerResource *res, const std::string &token,
 							 PlayerSession *ps, BSON::Object *request) {
 	int id = BSON::getIntVal("Id", request);
 	//int count = BSON::getIntVal("Number", request);
@@ -185,13 +185,13 @@ bool ItemServlet::doSellItem(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool ItemServlet::doAddItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doAddItem(ServerResource *res, const std::string &token,
 							PlayerSession *ps, BSON::Object *request) {
 	fprintf(stdout, "doAddItem\n");
 	return true;
 }
 
-bool ItemServlet::doMoveItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doMoveItem(ServerResource *res, const std::string &token,
 							 PlayerSession *ps, BSON::Object *request) {
 	int fromId = BSON::getIntVal("Id", request);
 	int toIdx = BSON::getIntVal("Index", request);
@@ -211,7 +211,7 @@ bool ItemServlet::doMoveItem(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool ItemServlet::doStrengthItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doStrengthItem(ServerResource *res, const std::string &token,
 								 PlayerSession *ps, BSON::Object *request) {
 	int equipId = BSON::getIntVal("Id", request);
 	int count = BSON::getIntVal("Count", request);
@@ -288,7 +288,7 @@ _result:
 	return true;
 }
 
-bool ItemServlet::doSortItems(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doSortItems(ServerResource *res, const std::string &token,
 							  PlayerSession *ps,  BSON::Object *request) {
 	Role *role = ps->role();
 	ItemBag *itemBag = role->itemBag();
@@ -326,7 +326,7 @@ bool ItemServlet::doSortItems(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool ItemServlet::doGetEquipments(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doGetEquipments(ServerResource *res, const std::string &token,
 								  PlayerSession *ps,  BSON::Object *request) {
 	printf("doGetEquipped Item\n");
 
@@ -354,7 +354,7 @@ bool ItemServlet::doGetEquipments(ServerResource::ptr res, const std::string &to
     ps->sendData(buf);
 	return true;
 }
-bool ItemServlet::doGetStrengthEquipInfo(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doGetStrengthEquipInfo(ServerResource *res, const std::string &token,
 										 PlayerSession *ps,  BSON::Object *request) {
 	int dbid = BSON::getIntVal("Id", request);
 
@@ -376,7 +376,7 @@ bool ItemServlet::doGetStrengthEquipInfo(ServerResource::ptr res, const std::str
 	return true;
 }
 
-bool ItemServlet::doEquipItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doEquipItem(ServerResource *res, const std::string &token,
 							  PlayerSession *ps,  BSON::Object *request) {
 	fprintf(stdout, "doEquipItem\n");
 	int dbId = BSON::getIntVal("Id", request);
@@ -405,7 +405,7 @@ bool ItemServlet::doEquipItem(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool ItemServlet::doGetEquipGems(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doGetEquipGems(ServerResource *res, const std::string &token,
 								 PlayerSession *ps,  BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::Array array;
@@ -420,7 +420,7 @@ bool ItemServlet::doGetEquipGems(ServerResource::ptr res, const std::string &tok
 	return false;
 }
 
-bool ItemServlet::doUnEquipItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doUnEquipItem(ServerResource *res, const std::string &token,
 								PlayerSession *ps,  BSON::Object *request) {
 	int id = BSON::getIntVal("Id", request);
 	Role *role = ps->role();
@@ -445,7 +445,7 @@ bool ItemServlet::doUnEquipItem(ServerResource::ptr res, const std::string &toke
 	return false;
 }
 
-bool ItemServlet::doAbandonItem(ServerResource::ptr res, const std::string &token,
+bool ItemServlet::doAbandonItem(ServerResource *res, const std::string &token,
 								PlayerSession *ps,  BSON::Object *request) {
 	int id = BSON::getIntVal("Id", request);
     fprintf(stdout, "doAbandonItem id %d\n", id);

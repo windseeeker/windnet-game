@@ -17,6 +17,26 @@ Item::ptr Item::createItem(Dataset::ItemTemplate *it, int roleId, short itemNum)
 	return item;
 }
 
+bool Item::addGem(Gem::ptr &gem) {
+	if (gem->pos >= 0 && gem->pos < (int)m_gems.size() && m_gems[gem->pos]) {
+		return false;
+	}
+	if (gem->pos >= (int)m_gems.size()) {
+		m_gems.resize(gem->pos + 1);
+	}
+	m_gems[gem->pos] = gem;
+	return true;
+}
+
+Gem::ptr Item::getGemById(int dbid) {
+	for (size_t i = 0; i < m_gems.size(); ++i) {
+		if (m_gems[i] && m_gems[i]->id == dbid) {
+			return m_gems[i];
+		}
+	}
+	return Gem::ptr();
+}
+
 void Item::flushNewToDB(DBConnection::ptr conn) {
 	bool b = conn->execute("insert into items(role_id, item_id, number, item_idx) values(%d, %d, %d, %d)",
 						   roleId(), itemId(), number(), index());
@@ -32,7 +52,7 @@ void Item::flushToDB(DBConnection::ptr conn) {
 	std::stringstream ss;
 	for (size_t i = 0; i < m_gems.size(); ++i) {
 		ss << m_gems[i]->id << ',' << m_gems[i]->gemId << ',' << m_gems[i]->pos << ','
-		   << m_gems[i]->current << ',' << m_gems[i]->max << ';';
+		   << m_gems[i]->exp;
 	}
 	std::string str = ss.str();
 	if (!str.empty()) {

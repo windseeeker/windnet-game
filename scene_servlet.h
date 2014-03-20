@@ -9,23 +9,23 @@ class PlayerSession;
 class SceneServlet : public Servlet {
 public:
 	void setupServlet() {}
-	bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRequest(const std::string &type, ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
 protected:
-	bool doEnterScene(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doEnterScene(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doAvatarWalk(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doAvatarWalk(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doEnterInstance(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doEnterInstance(ServerResource *res, const std::string &token,
 						 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doNotifyMonsterDead(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doNotifyMonsterDead(ServerResource *res, const std::string &token,
 							 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doLeaveInstanceScene(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doLeaveInstanceScene(ServerResource *res, const std::string &token,
 							  PlayerSession *ps, Windnet::BSON::Object *request);
 
 };

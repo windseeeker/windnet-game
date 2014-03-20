@@ -9,35 +9,35 @@ class PlayerSession;
 class SoulItemServlet : public Servlet {
 public:
 	void setupServlet() {}
-	bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRequest(const std::string &type, ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
 protected:
-	bool doLoadSoulItems(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doLoadSoulItems(ServerResource *res, const std::string &token,
 						 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doHuntSoulItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doHuntSoulItem(ServerResource *res, const std::string &token,
 						PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doSwallowSoulItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doSwallowSoulItem(ServerResource *res, const std::string &token,
 						   PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doSwallowAll(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doSwallowAll(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doBuySoulItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doBuySoulItem(ServerResource *res, const std::string &token,
 					   PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doEquiSoulItem(boost::shared_ptr<ServerResource> res, const std::string &token,
-						PlayerSession *ps, Windnet::BSON::Object *request);
-
-	bool doMoveSoulItem(boost::shared_ptr<ServerResource> res, const std::string &token,
-                        PlayerSession *ps, Windnet::BSON::Object *request);
-
-	bool doStoreSoulItem(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doEquipSoulItem(ServerResource *res, const std::string &token,
 						 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doGetEquipItemSoul(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doMoveSoulItem(ServerResource *res, const std::string &token,
+                        PlayerSession *ps, Windnet::BSON::Object *request);
+
+	bool doStoreSoulItem(ServerResource *res, const std::string &token,
+						 PlayerSession *ps, Windnet::BSON::Object *request);
+
+	bool doGetEquippedSouls(ServerResource *res, const std::string &token,
 							PlayerSession *ps, Windnet::BSON::Object *request);
 };
 #endif

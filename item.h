@@ -24,8 +24,7 @@ struct Gem {
 	int id;
 	int gemId;
 	char pos;
-	short current;
-	short max;
+	int exp;
 };
 
 class ItemBag;
@@ -70,8 +69,9 @@ public:
 	void state(short val) { m_item.set_state(val); }
 
 	const std::vector<Gem::ptr> gems() { return m_gems; }
+	bool addGem(Gem::ptr &gem);
 
-	Gem::ptr getGemById(int gemId) { return Gem::ptr(); }
+	Gem::ptr getGemById(int dbid);
 
 	Dataset::ItemTemplate *getTemplate() { return m_template; }
 	void setTemplate(Dataset::ItemTemplate *it) { m_template = it; }

@@ -5,12 +5,14 @@
 #include "account_manager.h"
 #include "dataset/role_attribute_template.h"
 #include "error_code.h"
+#include "item.h"
 #include "peer/server_manager.h"
 #include "role.h"
 #include "role_manager.h"
 #include "server_resource.h"
 #include "socket.h"
 #include "player_session.h"
+#include "player_session_manager.h"
 
 using namespace Windnet;
 using namespace Windnet::Net;
@@ -18,7 +20,7 @@ using namespace Windnet::Net;
 void RoleServlet::setupServlet() {
 }
 
-bool RoleServlet::doRequest(const std::string &type, ServerResource::ptr res,
+bool RoleServlet::doRequest(const std::string &type, ServerResource *res,
 							const std::string &token, PlayerSession *ps, BSON::Object *request) {
 	if (type == "CreateRole") {
 		return doCreateRole(res, token, ps, request);
@@ -39,7 +41,7 @@ bool RoleServlet::doRequest(const std::string &type, ServerResource::ptr res,
 	return false;
 }
 
-bool RoleServlet::doCreateRole(ServerResource::ptr res, const std::string &token,
+bool RoleServlet::doCreateRole(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
 	fprintf(stdout, "doCreateRole\n");
 	fflush(stdout);
@@ -88,7 +90,7 @@ bool RoleServlet::doCreateRole(ServerResource::ptr res, const std::string &token
 	return true;
 }
 
-bool RoleServlet::doValidateNickName(ServerResource::ptr res, const std::string &token,
+bool RoleServlet::doValidateNickName(ServerResource *res, const std::string &token,
 									 PlayerSession *ps,  BSON::Object *request) {
 	printf("Validate nick name\n");
 
@@ -113,7 +115,7 @@ bool RoleServlet::doValidateNickName(ServerResource::ptr res, const std::string 
 	return true;
 }
 
-bool RoleServlet::doLoadRoles(ServerResource::ptr res, const std::string &token,
+bool RoleServlet::doLoadRoles(ServerResource *res, const std::string &token,
 							  PlayerSession *ps,  BSON::Object *request) {
 	fprintf(stdout, "doLoadRoles\n");
 
@@ -171,7 +173,7 @@ _result:
 	return true;
 }
 
-bool RoleServlet::doChooseRole(ServerResource::ptr res, const std::string &token,
+bool RoleServlet::doChooseRole(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
 	fprintf(stdout, "doChooseRole\n");
 	if (token.empty()) {
@@ -192,11 +194,18 @@ bool RoleServlet::doChooseRole(ServerResource::ptr res, const std::string &token
 	}
 	RoleInfo::ptr roleInfo = it->second;
 	ai->current = roleInfo;
-	ps->loadRole(res, ai->current->roleId, ai->current);
+
+	PlayerSessionManager *psm = res->getPlayerSessionManager();
+	PlayerSession *ps2 = psm->getPlayer(roleId);
+	if (ps2) {                     //////////////////This is the cache 
+		ps->role(ps2->role());
+	} else {
+		ps->loadRole(res, ai->current->roleId, ai->current);
+	}
 
 	Role *role = ps->role();
 	//ps->roleInfo(ai->current); //////////////////////////////////////
-	Dataset::RoleAttribute::ptr ra = role->attribute();
+	Dataset::RoleAttribute *ra = role->attribute();
 
 	BSON::Object response, body, roleInfoObj;
 	BSON::setIntVal(roleInfoObj, "SceneId", 1); //////////////////Added by william
@@ -214,6 +223,12 @@ bool RoleServlet::doChooseRole(ServerResource::ptr res, const std::string &token
 	BSON::setObjectVal(body, "RoleInfo", roleInfoObj);
 
 	BSON::Array equipObj, skillObj, petObj, mountObj;
+
+	const std::vector<Item::ptr> equipments = role->equipments();
+	for (size_t i = 0; i < equipments.size(); ++i) {
+		//BSON::Object obj;
+		//BSON::setIntVal
+	}
 	BSON::setArrayVal(body, "Equips", equipObj);
 	BSON::setArrayVal(body, "Skills", skillObj);
 	BSON::setArrayVal(body, "Pets", petObj);
@@ -252,13 +267,13 @@ bool RoleServlet::doChooseRole(ServerResource::ptr res, const std::string &token
 	return true;
 }
 
-bool RoleServlet::doRemoveRole(ServerResource::ptr res, const std::string &token,
+bool RoleServlet::doRemoveRole(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
     fprintf(stdout, "doRemoveRole\n");
     return true;
 }
 
-bool RoleServlet::doRecoveryRole(ServerResource::ptr res, const std::string &token,
+bool RoleServlet::doRecoveryRole(ServerResource *res, const std::string &token,
 								 PlayerSession *ps,  BSON::Object *request) {
 	fprintf(stdout, "doRecoveryRole\n");
 	return true;

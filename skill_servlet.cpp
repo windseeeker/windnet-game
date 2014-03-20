@@ -10,7 +10,7 @@
 using namespace Windnet;
 using namespace Windnet::Net;
 
-bool SkillServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool SkillServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 							 PlayerSession *ps, BSON::Object *request) {
 	if (type == "SkillInfo") {
 		return doLoadSkills(res, token, ps, request);
@@ -29,7 +29,7 @@ bool SkillServlet::doRequest(const std::string &type, ServerResource::ptr res, c
 	return false;
 }
 
-bool SkillServlet::doLoadSkills(ServerResource::ptr res, const std::string &token,
+bool SkillServlet::doLoadSkills(ServerResource *res, const std::string &token,
 								PlayerSession *ps,  BSON::Object *request) {
 
 	BSON::Object response, body;
@@ -46,7 +46,7 @@ bool SkillServlet::doLoadSkills(ServerResource::ptr res, const std::string &toke
 	return true;
 }
 
-bool SkillServlet::doUpgradeSkill(ServerResource::ptr res, const std::string &token,
+bool SkillServlet::doUpgradeSkill(ServerResource *res, const std::string &token,
 								  PlayerSession *ps, BSON::Object *request) {
 	fprintf(stdout, "doUpgradeSkill\n");
 	return true;

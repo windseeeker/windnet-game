@@ -25,16 +25,16 @@ public:
 	typedef boost::shared_ptr<Servlet> ptr;
 
 	virtual void setupServlet()  {}
-	virtual bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res,
+	virtual bool doRequest(const std::string &type, ServerResource *res,
 						   const std::string &token, PlayerSession *ps, Windnet::BSON::Object *request) = 0;
 };
 
 class ServletDispatch {
 public:
 	void init();
-	bool dispatchMessage(boost::shared_ptr<ServerResource> res, Windnet::Message *msg);
+	bool dispatchMessage(ServerResource *res, Windnet::Message *msg);
 
-	bool dispatch(boost::shared_ptr<ServerResource> res, PlayerSession *ps, Windnet::BSON::Object &request);
+	bool dispatch(ServerResource *res, PlayerSession *ps, Windnet::BSON::Object &request);
 
 private:
 	std::map<std::string, Servlet::ptr> m_servlets;

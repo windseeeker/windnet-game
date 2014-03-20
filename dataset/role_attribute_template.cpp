@@ -13,7 +13,7 @@ bool RoleAttributeTemplate::init() {
 	int level, val;
 	std::string str;
     do {
-		RoleAttribute::ptr attr(new RoleAttribute);
+		RoleAttribute *attr = new RoleAttribute;
 		ASSERT(reader.Attribute("level", level));
 		ASSERT(reader.Attribute("hp", attr->hp));
 		ASSERT(reader.Attribute("leve_exp", attr->levelExp));
@@ -45,8 +45,8 @@ bool RoleAttributeTemplate::init() {
 	return true;
 }
 
-RoleAttribute::ptr RoleAttributeTemplate::get(short level) {
-	std::map<int, RoleAttribute::ptr>::iterator it = m_attributes.find(level);
-	return it == m_attributes.end() ? RoleAttribute::ptr() : it->second;
+RoleAttribute *RoleAttributeTemplate::get(short level) {
+	std::map<int, RoleAttribute*>::iterator it = m_attributes.find(level);
+	return it == m_attributes.end() ? NULL : it->second;
 }
 }

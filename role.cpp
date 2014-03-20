@@ -12,10 +12,23 @@ using namespace Windnet;
 using namespace Windnet::Mysql;
 
 Role::Role() {
+	m_attribute = 0;
+	m_scene = NULL;
 	m_itemBag = new ItemBag;
 	m_skillBag = new SkillBag;
 	m_task = new Task;
 	m_soulsBag = new SoulsBag;
+}
+
+Role::~Role() {
+	delete m_itemBag;
+	delete m_skillBag;
+	delete m_task;
+	delete m_soulsBag;
+	m_itemBag = NULL;
+	m_skillBag = NULL;
+	m_task = NULL;
+	m_soulsBag = NULL;
 }
 
 void Role::flushToDB(DBConnection::ptr conn) {

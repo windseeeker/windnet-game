@@ -12,7 +12,7 @@ bool SkillTemplateManager::init() {
 	}
 	//int val;
     do {
-		SkillTemplate::ptr skill(new SkillTemplate);
+		SkillTemplate *skill = new SkillTemplate;
 		ASSERT(reader.Attribute("Task_id", skill->skillId));
 		ASSERT(reader.Attribute("Task_Type", skill->skillType));
 
@@ -22,8 +22,8 @@ bool SkillTemplateManager::init() {
 	return true;
 }
 
-SkillTemplate::ptr SkillTemplateManager::get(int id) {
-	std::map<int, SkillTemplate::ptr>::iterator it = m_skills.find(id);
-	return it == m_skills.end() ? SkillTemplate::ptr() : it->second;
+SkillTemplate *SkillTemplateManager::get(int id) {
+	std::map<int, SkillTemplate*>::iterator it = m_skills.find(id);
+	return it == m_skills.end() ? NULL : it->second;
 }
 }

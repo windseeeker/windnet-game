@@ -17,7 +17,7 @@ using namespace Windnet::Net;
 void LoginServlet::setupServlet() {
 }
 
-bool LoginServlet::doRequest(const std::string &type, ServerResource::ptr res,
+bool LoginServlet::doRequest(const std::string &type, ServerResource *res,
 							 const std::string &token, PlayerSession *ps, BSON::Object *request) {
 	if (type == "Register") {
 		return doRegister(res, token, ps, request);
@@ -45,7 +45,7 @@ bool LoginServlet::doRequest(const std::string &type, ServerResource::ptr res,
 	return false;
 }
 
-bool LoginServlet::doRegister(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doRegister(ServerResource *res, const std::string &token,
 							  PlayerSession *ps,  BSON::Object *request) {
 	std::string name = BSON::getStringVal("Name", request);
 	std::string passwd = BSON::getStringVal("Pwd", request);
@@ -88,7 +88,7 @@ bool LoginServlet::doRegister(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool LoginServlet::doValidateName(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doValidateName(ServerResource *res, const std::string &token,
 								  PlayerSession *ps,  BSON::Object *request) {
 	std::string name = BSON::getStringVal("Name", request);
 	if (name.empty()) {
@@ -115,7 +115,7 @@ bool LoginServlet::doValidateName(ServerResource::ptr res, const std::string &to
 	return true;
 }
 
-bool LoginServlet::doLogin(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doLogin(ServerResource *res, const std::string &token,
 						   PlayerSession *ps, BSON::Object *request) {
 	std::string loginType = BSON::getStringVal("Type", request);
 	if (loginType == "auto") {
@@ -186,7 +186,7 @@ bool LoginServlet::doLogin(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool LoginServlet::doAutoLogin(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doAutoLogin(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
 	AccountManager::ptr am = res->getAccountManager();
 	std::string name = BSON::getStringVal("Name", request);
@@ -234,7 +234,7 @@ bool LoginServlet::doAutoLogin(ServerResource::ptr res, const std::string &token
 	return true;
 }
 
-bool LoginServlet::doLoadServerTowns(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doLoadServerTowns(ServerResource *res, const std::string &token,
 									 PlayerSession *ps, BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::Array array;
@@ -261,7 +261,7 @@ bool LoginServlet::doLoadServerTowns(ServerResource::ptr res, const std::string 
 	return true;
 }
 
-bool LoginServlet::doLoadServers(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doLoadServers(ServerResource *res, const std::string &token,
 								 PlayerSession *ps, BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::Array array;
@@ -293,7 +293,7 @@ bool LoginServlet::doLoadServers(ServerResource::ptr res, const std::string &tok
 	return true;
 }
 
-bool LoginServlet::doGetCurrentRecommandSrv(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doGetCurrentRecommandSrv(ServerResource *res, const std::string &token,
 											PlayerSession *ps, BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::setStringVal(response, "Command", "GetRecommandServer");
@@ -314,7 +314,7 @@ bool LoginServlet::doGetCurrentRecommandSrv(ServerResource::ptr res, const std::
 	return true;
 }
 
-bool LoginServlet::doGetRecommandServers(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doGetRecommandServers(ServerResource *res, const std::string &token,
 										 PlayerSession *ps, BSON::Object *request) {
 	BSON::Object response, body;
 	BSON::Array array;
@@ -346,7 +346,7 @@ bool LoginServlet::doGetRecommandServers(ServerResource::ptr res, const std::str
 	return true;
 }
 
-bool LoginServlet::doGetServerInfo(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doGetServerInfo(ServerResource *res, const std::string &token,
 								   PlayerSession *ps, BSON::Object *request) {
 	int serverId = BSON::getIntVal("Id", request);
 	fprintf(stdout, "DDDDDDDDDDDDDDDDDDDDDDDDOOOOOOOOOOOOOOOOOOOOOO get simple server %d \n", serverId);
@@ -376,7 +376,7 @@ bool LoginServlet::doGetServerInfo(ServerResource::ptr res, const std::string &t
 	return true;
 }
 
-bool LoginServlet::doChooseServer(ServerResource::ptr res, const std::string &token,
+bool LoginServlet::doChooseServer(ServerResource *res, const std::string &token,
 								  PlayerSession *ps, BSON::Object *request) {
 	int serverId = BSON::getIntVal("Id", request);
 	//int userId = request->getIntValue("UserId");

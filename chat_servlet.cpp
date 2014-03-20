@@ -9,7 +9,7 @@
 
 using namespace Windnet;
 using namespace Windnet::Net;
-bool ChatServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool ChatServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 							PlayerSession *ps, BSON::Object *request) {
 	if (type == "SendMessage") {
 		return doChat(res, token, ps, request);
@@ -20,7 +20,7 @@ bool ChatServlet::doRequest(const std::string &type, ServerResource::ptr res, co
 	return false;
 }
 
-bool ChatServlet::doChat(ServerResource::ptr res, const std::string &token,
+bool ChatServlet::doChat(ServerResource *res, const std::string &token,
 						 PlayerSession *ps,  BSON::Object *request) {
 	return true;
 }

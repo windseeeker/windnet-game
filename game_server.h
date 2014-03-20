@@ -1,7 +1,7 @@
 #ifndef __GAME_SERVER_H__
 #define __GAME_SERVER_H__
 
-#include "boost/shared_ptr.hpp"
+//#include "boost/shared_ptr.hpp"
 
 class PacketDispatch;
 class ServerResource;
@@ -23,16 +23,16 @@ public:
 	GameServer();
 	~GameServer();
 
-	boost::shared_ptr<Windnet::Net::SocketServer> sockServer() const { return m_sockServer; }
+	Windnet::Net::SocketServer *sockServer() const { return m_sockServer; }
 
-	boost::shared_ptr<ServerResource> serverRes() { return m_resource; }
+	ServerResource *serverRes() { return m_resource; }
 
 	void init();
 	void start();
 
 private:
-	boost::shared_ptr<Windnet::Net::SocketServer> m_sockServer;
-	boost::shared_ptr<ServerResource> m_resource;
+	Windnet::Net::SocketServer *m_sockServer;
+	ServerResource *m_resource;
 };
 
 #endif

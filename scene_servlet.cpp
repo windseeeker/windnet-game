@@ -14,7 +14,7 @@
 
 using namespace Windnet;
 using namespace Windnet::Net;
-bool SceneServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool SceneServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 							 PlayerSession *ps, BSON::Object *request) {
 	if (type == "InLobby") {
 		return doEnterScene(res, token, ps, request);
@@ -33,7 +33,7 @@ bool SceneServlet::doRequest(const std::string &type, ServerResource::ptr res, c
 	return false;
 }
 
-bool SceneServlet::doEnterScene(ServerResource::ptr res, const std::string &token,
+bool SceneServlet::doEnterScene(ServerResource *res, const std::string &token,
 								PlayerSession *ps,  BSON::Object *request) {
 	int sceneId = BSON::getIntVal("SceneId", request);
 
@@ -78,7 +78,7 @@ bool SceneServlet::doEnterScene(ServerResource::ptr res, const std::string &toke
 	return true;
 }
 
-bool SceneServlet::doAvatarWalk(ServerResource::ptr res, const std::string &token,
+bool SceneServlet::doAvatarWalk(ServerResource *res, const std::string &token,
 								PlayerSession *ps, BSON::Object *request) {
 	AccountInfo::ptr ai = res->getAccountManager()->getAccountInfoByToken(token);
     if (!ai || !ai->current) {
@@ -110,9 +110,13 @@ bool SceneServlet::doAvatarWalk(ServerResource::ptr res, const std::string &toke
 	return true;
 }
 
-bool SceneServlet::doEnterInstance(ServerResource::ptr res, const std::string &token,
+bool SceneServlet::doEnterInstance(ServerResource *res, const std::string &token,
 								   PlayerSession *ps, BSON::Object *request) {
 	printf("Join part\n");
+	Scene *scene = ps->role()->scene();
+	if (!scene) {
+		return false;
+	}
 
 	BSON::Object response, body;
 	BSON::setStringVal(response, "Command", "JoinPart");
@@ -126,7 +130,7 @@ bool SceneServlet::doEnterInstance(ServerResource::ptr res, const std::string &t
 	return true;
 }
 
-bool SceneServlet::doNotifyMonsterDead(ServerResource::ptr res, const std::string &token,
+bool SceneServlet::doNotifyMonsterDead(ServerResource *res, const std::string &token,
 									   PlayerSession *ps, BSON::Object *request) {
 	int monsterId = BSON::getIntVal("Id", request);
 	printf("notify monster dead, monId %d\n", monsterId);
@@ -143,7 +147,7 @@ bool SceneServlet::doNotifyMonsterDead(ServerResource::ptr res, const std::strin
     return true;
 }
 
-bool SceneServlet::doLeaveInstanceScene(ServerResource::ptr res, const std::string &token,
+bool SceneServlet::doLeaveInstanceScene(ServerResource *res, const std::string &token,
 										PlayerSession *ps, BSON::Object *request) {
 	printf("Do leave instance scene");
 

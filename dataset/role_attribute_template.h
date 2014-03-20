@@ -8,7 +8,6 @@
 
 namespace Dataset {
 struct RoleAttribute {
-	typedef boost::shared_ptr<RoleAttribute> ptr;
 	int levelExp;
 	int maxHP;
 	int hp;
@@ -36,10 +35,10 @@ public:
 
 	bool init();
 
-	RoleAttribute::ptr get(short level);
+	RoleAttribute *get(short level);
 
 private:
-	std::map<int, RoleAttribute::ptr> m_attributes;
+	std::map<int, RoleAttribute*> m_attributes;
 };
 }
 

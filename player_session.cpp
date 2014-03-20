@@ -20,7 +20,7 @@ RoleInfo::ptr PlayerSession::roleInfo() {
 	return m_role ? m_role->roleInfo() : RoleInfo::ptr();
 }
 
-bool PlayerSession::loadRole(ServerResource::ptr res, int roleId, boost::shared_ptr<RoleInfo> &ri) {
+bool PlayerSession::loadRole(ServerResource *res, int roleId, boost::shared_ptr<RoleInfo> &ri) {
 	if (m_role) {
 		return true;
 	}
@@ -29,7 +29,7 @@ bool PlayerSession::loadRole(ServerResource::ptr res, int roleId, boost::shared_
 
 	Dataset::ItemTemplateManager *itm = res->getTemplateManager()->getItemTemplateManager();
 	m_role->loadFromDB(res->getTemplateManager()->getRoleAttriTemplate(), res->getDBConnection(), roleId);
-	m_role->itemBag()->loadFromDB(itm, res->getDBConnection(), roleId);
+	m_role->itemBag()->loadFromDB(itm, res->getDBConnection(), m_role);
 	m_role->soulsBag()->loadFromDB(itm, res->getDBConnection(), roleId);
 	return true;
 }
@@ -52,4 +52,5 @@ void PlayerSession::playerOffline() {
 		m_role->scene()->leaveScene(this);
 	}
 	m_role->lastLogoutTime(getCurrentSecond());
+	delete m_role; ///////TODO
 }

@@ -14,7 +14,9 @@
 using namespace Windnet;
 using namespace Windnet::Net;
 
-bool GemServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+Dataset::ItemTemplate *g_fragmentTemplate = NULL;
+
+bool GemServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 						   PlayerSession *ps, BSON::Object *request) {
 	if (type == "GetEquipGem") {
 		return doGetEquipGem(res, token, ps, request);
@@ -31,7 +33,7 @@ bool GemServlet::doRequest(const std::string &type, ServerResource::ptr res, con
 	return false;
 }
 
-bool GemServlet::doGetEquipGem(ServerResource::ptr res, const std::string &token,
+bool GemServlet::doGetEquipGem(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
 	int id = BSON::getIntVal("Id", request);
 	Role *role = ps->role();
@@ -51,8 +53,7 @@ bool GemServlet::doGetEquipGem(ServerResource::ptr res, const std::string &token
 		BSON::setIntVal(obj, "Id", gems[i]->id);
 		BSON::setIntVal(obj, "PropId", gems[i]->gemId);
 		BSON::setIntVal(obj, "Index", gems[i]->pos);
-		BSON::setIntVal(obj, "CurrentLen", gems[i]->current);
-		BSON::setIntVal(obj, "CurrentLen", gems[i]->max);
+		BSON::setIntVal(obj, "Exp", gems[i]->exp);
 
 		BSON::Value val;
 		val = obj;
@@ -69,20 +70,14 @@ bool GemServlet::doGetEquipGem(ServerResource::ptr res, const std::string &token
 	return true;
 }
 
-bool GemServlet::doEquipGem(ServerResource::ptr res, const std::string &token,
+bool GemServlet::doEquipGem(ServerResource *res, const std::string &token,
 							PlayerSession *ps,  BSON::Object *request) {
 	printf("do Equip gem\n");
 
 	int equipId = BSON::getIntVal("EquipId", request);
 	int gemId = BSON::getIntVal("GemId", request);
-	//int index = BSON::getIntVal("Index", request);
+	int idx = BSON::getIntVal("Index", request);
 
-	Dataset::ItemTemplateManager *itm = res->getTemplateManager()->getItemTemplateManager();
-	Dataset::ItemTemplate *equipTemp = itm->get(equipId);
-	if (!equipTemp) {
-		printf("no such \n");
-		return true;
-	}
 	Role *role = ps->role();
 	Item::ptr equipItem = role->itemBag()->get(equipId);
 	if (!equipItem) {
@@ -94,10 +89,35 @@ bool GemServlet::doEquipGem(ServerResource::ptr res, const std::string &token,
 		printf("Role has no gem [%d] to equip gem\n", gemId);
 		return true;
 	}
+	Gem::ptr gem(new Gem);
+	gem->id = gemItem->id(); ////////////////////globalId is gem item's id
+	gem->gemId = gemId;
+	gem->pos = idx;
+	gem->exp = 0;
+	if (!equipItem->addGem(gem)) {
+		printf("equip gem error idx \n");
+		return true;
+	}
+	role->itemBag()->removeItem(gemItem);
+	gemItem->state(Item::ITEM_STATE_DELETED);
+	gemItem->flushToDB(res->getDBConnection());
+	equipItem->flushToDB(res->getDBConnection());
+
+	BSON::Object response, body;
+	BSON::setStringVal(response, "Command", "UpGem");
+	BSON::setIntVal(body, "EquipId", equipId);
+	BSON::setIntVal(body, "Index", idx);
+	BSON::setIntVal(body, "Exp", 0);
+	BSON::setObjectVal(response, "Body", body);
+
+	Buffer buf;
+	BSON::serializeToBuffer(buf, response);
+	BsonBuffer::serializeToBuffer(buf);
+    ps->sendData(buf);
 	return true;
 }
 
-bool GemServlet::doUnEquipGem(ServerResource::ptr res, const std::string &token,
+bool GemServlet::doUnEquipGem(ServerResource *res, const std::string &token,
 							  PlayerSession *ps, BSON::Object *request) {
 	printf("doUnEquip gem\n");
 
@@ -118,7 +138,7 @@ bool GemServlet::doUnEquipGem(ServerResource::ptr res, const std::string &token,
 	return true;
 }
 
-bool GemServlet::doStrengthGem(ServerResource::ptr res, const std::string &token,
+bool GemServlet::doStrengthGem(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
 	printf("doStrength Gem\n");
 
@@ -138,10 +158,17 @@ bool GemServlet::doStrengthGem(ServerResource::ptr res, const std::string &token
 		return true;
 	}
 	Dataset::ItemTemplateManager *itm = res->getTemplateManager()->getItemTemplateManager();
-	Dataset::ItemTemplate *gemTemp = itm->get(gemId);
+	Dataset::ItemTemplate *gemTemp = itm->get(gem->gemId);
 	if (!gemTemp) {
-		printf("No such gem[%d] template\n", gemId);
+		printf("No such gem[%d] template\n", gem->gemId);
 		return true;
+	}
+	if (!g_fragmentTemplate) {
+		g_fragmentTemplate= itm->get(Gem::GEM_FRAGMENT_ID);
+		if (!g_fragmentTemplate) {
+			printf("Get fragment template error, no such\n");
+			return true;
+		}
 	}
 	int fragmentCount = role->itemBag()->getItemCountByTemplateId(Gem::GEM_FRAGMENT_ID);
 	int error = ErrorCode::ERROR_CODE_NO_ERROR;
@@ -150,18 +177,18 @@ bool GemServlet::doStrengthGem(ServerResource::ptr res, const std::string &token
 			error = ErrorCode::STRENGTH_GEM_NO_ENOUGH_FRAGMENT;
 			break;
 		}
-		//
+		gem->exp += g_fragmentTemplate->correspondingExp * count;
+		//TODO  Level
 
 	} while (0);
 
-	role->itemBag()->decItemCountByTemplateId(Gem::GEM_FRAGMENT_ID, count);
+	role->itemBag()->decItemCountByTemplateId(res->getDBConnection(), Gem::GEM_FRAGMENT_ID, count);
 
 	BSON::Object response, body;
 	BSON::setStringVal(response, "Command", "StrengGem");
 	if (error == ErrorCode::ERROR_CODE_NO_ERROR) {
 		BSON::setIntVal(body, "PropId", gem->gemId);
-		BSON::setIntVal(body, "CurrentLen", gem->current);
-		BSON::setIntVal(body, "MaxLen", gem->max);
+		BSON::setIntVal(body, "Exp", gem->exp);
 	} else {
 		BSON::setBoolVal(body, "Error", true);
 		BSON::setIntVal(body, "ErrorMsg", error);

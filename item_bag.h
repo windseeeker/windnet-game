@@ -17,6 +17,7 @@ namespace Dataset {
 	class ItemTemplateManager;
 }
 
+class Role;
 class Item;
 class ItemBag {
 public:
@@ -26,7 +27,7 @@ public:
      ItemBag():m_lastSyncTime(0) { m_items.resize(DEFAULT_BAG_CELL); }
 
 	void loadFromDB(Dataset::ItemTemplateManager *item,
-					boost::shared_ptr<Windnet::Mysql::DBConnection>, int roleId);
+					boost::shared_ptr<Windnet::Mysql::DBConnection>, Role *role);
 
 	void listItems(std::list<boost::shared_ptr<Item> > &l);
 	const std::vector<boost::shared_ptr<Item> > &items() const { return m_items; }
@@ -42,8 +43,9 @@ public:
 	void sortItems();
 	void moveItem(boost::shared_ptr<Windnet::Mysql::DBConnection> conn, int fromId, short toIdx);
 
-	int getItemCountByTemplateId(int itemId) { return 1; }
-	void decItemCountByTemplateId(int itemId, short count) { }
+	int getItemCountByTemplateId(int templateId);
+	void decItemCountByTemplateId(boost::shared_ptr<Windnet::Mysql::DBConnection> conn,
+								  int itemId, short count) { }
 
 private:
 	unsigned int m_lastSyncTime;

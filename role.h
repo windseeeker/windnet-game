@@ -22,6 +22,7 @@ namespace Dataset {
 class RoleInfo;
 class Item;
 class ItemBag;
+class PlayerSession;
 class SoulsBag;
 class Scene;
 class Task;
@@ -30,6 +31,7 @@ class Role {
 public:
 	typedef boost::shared_ptr<Role> ptr;
 	Role();
+	~Role();
 
 	void loadFromDB(Dataset::RoleAttributeTemplate *ram,
 					boost::shared_ptr<Windnet::Mysql::DBConnection>, int roleId);
@@ -93,12 +95,14 @@ public:
 	}
 
 	StatsAttr &attr() { return m_attr;}
+	void updateAttribute() { }
+	void updateAttributeToClient(PlayerSession *ps) { }
 
-	void equipItem(boost::shared_ptr<Item> &item) { m_equips.push_back(item); }
+	void addEquipItem(boost::shared_ptr<Item> &item) { m_equips.push_back(item); }
 
 	const std::vector<boost::shared_ptr<Item> > & equipments() const { return m_equips; }
 
-	boost::shared_ptr<Dataset::RoleAttribute> attribute() { return m_attribute; }
+	Dataset::RoleAttribute *attribute() { return m_attribute; }
 
 	void scene(Scene *scene) { m_scene = scene; }
 
@@ -115,12 +119,11 @@ private:
 	Task *m_task;
 	SkillBag *m_skillBag;
 	SoulsBag *m_soulsBag;
-	warrior::Role m_role;
-	boost::shared_ptr<Dataset::RoleAttribute> m_attribute;
-
+	Dataset::RoleAttribute *m_attribute;
 	std::vector<boost::shared_ptr<Item> > m_equips;
 	StatsAttr m_attr;
 	int m_fightingValue;
+	warrior::Role m_role;
 };
 
 #endif

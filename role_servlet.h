@@ -19,26 +19,26 @@ public:
 	};
 
 	void setupServlet();
-	bool doRequest(const std::string &type, boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRequest(const std::string &type, ServerResource *res, const std::string &token,
 				   PlayerSession *ps, Windnet::BSON::Object *request);
 
 protected:
-	bool doCreateRole(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doCreateRole(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doValidateNickName(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doValidateNickName(ServerResource *res, const std::string &token,
 							PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doLoadRoles(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doLoadRoles(ServerResource *res, const std::string &token,
 					 PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doChooseRole(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doChooseRole(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doRemoveRole(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRemoveRole(ServerResource *res, const std::string &token,
 					  PlayerSession *ps, Windnet::BSON::Object *request);
 
-	bool doRecoveryRole(boost::shared_ptr<ServerResource> res, const std::string &token,
+	bool doRecoveryRole(ServerResource *res, const std::string &token,
 						PlayerSession *ps, Windnet::BSON::Object *request);
 };
 

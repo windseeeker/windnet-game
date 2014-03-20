@@ -14,7 +14,7 @@
 using namespace Windnet;
 using namespace Windnet::Net;
 
-bool TaskServlet::doRequest(const std::string &type, ServerResource::ptr res, const std::string &token,
+bool TaskServlet::doRequest(const std::string &type, ServerResource *res, const std::string &token,
 							PlayerSession *ps, BSON::Object *request) {
 	if (type == "LoadTasks") {
 		return doLoadTasks(res, token, ps, request);
@@ -29,14 +29,14 @@ bool TaskServlet::doRequest(const std::string &type, ServerResource::ptr res, co
 	return false;
 }
 
-bool TaskServlet::doLoadTasks(ServerResource::ptr res, const std::string &token,
+bool TaskServlet::doLoadTasks(ServerResource *res, const std::string &token,
 							  PlayerSession *ps,  BSON::Object *request) {
 	BSON::Object response, body;
 
 	return true;
 }
 
-bool TaskServlet::doAcceptTask(ServerResource::ptr res, const std::string &token,
+bool TaskServlet::doAcceptTask(ServerResource *res, const std::string &token,
 							   PlayerSession *ps, BSON::Object *request) {
 	int taskId = BSON::getIntVal("TaskId", request);
 	fprintf(stdout, "doAcceptTask %d \n", taskId);
@@ -73,7 +73,7 @@ bool TaskServlet::doAcceptTask(ServerResource::ptr res, const std::string &token
 	return true;
 }
 
-bool TaskServlet::doFinishTask(ServerResource::ptr res, const std::string &token,
+bool TaskServlet::doFinishTask(ServerResource *res, const std::string &token,
 							   PlayerSession *ps,  BSON::Object *request) {
 	int taskId = BSON::getIntVal("TaskUniqueId", request);
 
